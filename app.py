@@ -6,7 +6,7 @@ st.set_page_config(page_title="AI Threat Detector", layout="wide")
 
 st.title("🔐 Real-Time AI Cloud Threat Detection Dashboard")
 
-# 🔄 Manual refresh
+# 🔄 Manual refresh button
 if st.button("🔄 Refresh Data"):
     st.rerun()
 
@@ -19,7 +19,7 @@ except:
 
 # 📊 Logs
 st.subheader("📡 Live Log Stream")
-st.dataframe(data, use_container_width=True)
+st.dataframe(data, width="stretch")
 
 # 🚨 Rule detection
 failed_logins = data[data['status'] == 'failed']
@@ -27,16 +27,16 @@ failed_count = failed_logins.groupby(['user', 'ip']).size().reset_index(name='fa
 suspicious_users = failed_count[failed_count['fail_count'] > 3]
 
 st.subheader("🚨 Suspicious Users")
-st.dataframe(suspicious_users)
+st.dataframe(suspicious_users, width="stretch")
 
 # 🌐 IP detection
 ip_activity = data.groupby('ip').size().reset_index(name='request_count')
 suspicious_ips = ip_activity[ip_activity['request_count'] > 8]
 
 st.subheader("🌐 Suspicious IPs")
-st.dataframe(suspicious_ips)
+st.dataframe(suspicious_ips, width="stretch")
 
-# 🤖 AI
+# 🤖 AI Detection
 st.subheader("🤖 AI Detected Anomalies")
 
 try:
@@ -58,7 +58,7 @@ try:
 
     anomalies = data_encoded[data_encoded['anomaly'] == -1]
 
-    st.dataframe(anomalies)
+    st.dataframe(anomalies, width="stretch")
 
 except Exception as e:
     st.error(f"AI Error: {e}")
