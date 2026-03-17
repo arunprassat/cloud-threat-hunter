@@ -1,42 +1,42 @@
 import streamlit as st
 import pandas as pd
 from sklearn.ensemble import IsolationForest
-from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="AI Threat Detector", layout="wide")
 
 st.title("🔐 Real-Time AI Cloud Threat Detection Dashboard")
 
-# 🔁 Auto refresh every 3 seconds
-st_autorefresh(interval=3000, key="refresh")
+# 🔄 Manual refresh
+if st.button("🔄 Refresh Data"):
+    st.rerun()
 
-# 📡 Read live logs from logs.csv
+# 📡 Read logs
 try:
     data = pd.read_csv("logs.csv")
 except:
     st.warning("⏳ Waiting for logs... Run log_generator.py")
     st.stop()
 
-# 📊 Show logs
+# 📊 Logs
 st.subheader("📡 Live Log Stream")
 st.dataframe(data, use_container_width=True)
 
-# 🚨 Rule-based detection
+# 🚨 Rule detection
 failed_logins = data[data['status'] == 'failed']
 failed_count = failed_logins.groupby(['user', 'ip']).size().reset_index(name='fail_count')
 suspicious_users = failed_count[failed_count['fail_count'] > 3]
 
-st.subheader("🚨 Suspicious Users (Brute Force)")
-st.dataframe(suspicious_users, use_container_width=True)
+st.subheader("🚨 Suspicious Users")
+st.dataframe(suspicious_users)
 
-# 🌐 Suspicious IPs
+# 🌐 IP detection
 ip_activity = data.groupby('ip').size().reset_index(name='request_count')
 suspicious_ips = ip_activity[ip_activity['request_count'] > 8]
 
 st.subheader("🌐 Suspicious IPs")
-st.dataframe(suspicious_ips, use_container_width=True)
+st.dataframe(suspicious_ips)
 
-# 🤖 AI Detection
+# 🤖 AI
 st.subheader("🤖 AI Detected Anomalies")
 
 try:
@@ -58,7 +58,7 @@ try:
 
     anomalies = data_encoded[data_encoded['anomaly'] == -1]
 
-    st.dataframe(anomalies, use_container_width=True)
+    st.dataframe(anomalies)
 
 except Exception as e:
     st.error(f"AI Error: {e}")
