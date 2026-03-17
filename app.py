@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 import time
 from sklearn.ensemble import IsolationForest
 
@@ -7,16 +8,25 @@ st.set_page_config(page_title="AI Threat Detector", layout="wide")
 
 st.title("🔐 Real-Time AI Cloud Threat Detection Dashboard")
 
-# ⏱ Auto refresh every 3 seconds
-time.sleep(3)
-st.rerun()
+# 🔁 Auto refresh every 3 seconds (SAFE)
+if "last_refresh" not in st.session_state:
+    st.session_state.last_refresh = time.time()
 
-# 📡 Read logs from file
-try:
-    data = pd.read_csv("logs.csv")
-except:
-    st.warning("⏳ Waiting for logs... Run log_generator.py")
+if time.time() - st.session_state.last_refresh > 3:
+    st.session_state.last_refresh = time.time()
+    st.rerun()
+
+# 📡 Read logs safely
+file_path = "logs.csv"
+
+if not os.path.exists(file_path) or os.stat(file_path).st_size == 0:
+    st.warning("📂 No logs available... Run log_generator.py")
     st.stop()
+
+data = pd.read_csv(file_path)
+
+# Keep only latest logs
+data = data.tail(100)
 
 # 📊 Show logs
 st.subheader("📡 Live Log Stream")
@@ -43,19 +53,15 @@ st.subheader("🤖 AI Detected Anomalies")
 try:
     data_encoded = data.copy()
 
-    # Encode status
     data_encoded['status'] = data_encoded['status'].map({'success': 0, 'failed': 1}).fillna(0)
 
-    # Convert IP
     data_encoded['ip'] = data_encoded['ip'].astype(str).apply(
         lambda x: sum([int(i) for i in x.split('.') if i.isdigit()])
     )
 
-    # Convert time
     data_encoded['time'] = data_encoded['time'].astype(str).str.replace(":", "", regex=False)
     data_encoded['time'] = pd.to_numeric(data_encoded['time'], errors='coerce').fillna(0)
 
-    # Train model
     model = IsolationForest(contamination=0.2, random_state=42)
     data_encoded['anomaly'] = model.fit_predict(
         data_encoded[['ip', 'time', 'status']]
