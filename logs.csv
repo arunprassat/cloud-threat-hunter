@@ -1,0 +1,10 @@
+user,ip,time,status
+john,192.168.1.1,10:00,success
+john,192.168.1.1,10:01,failed
+john,192.168.1.1,10:02,failed
+john,192.168.1.1,10:03,failed
+john,192.168.1.1,10:04,failed
+john,192.168.1.1,10:05,failed
+alice,10.0.0.1,11:00,success
+bob,172.16.0.5,12:00,success
+bob,172.16.0.5,12:01,failed
